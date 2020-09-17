@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/ovh/cds/engine/cache"
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/cdn/redis"
 	"github.com/ovh/cds/engine/cdn/storage"
 	"github.com/ovh/cds/sdk"
@@ -52,7 +52,7 @@ func (s *Redis) Init(ctx context.Context, cfg interface{}) error {
 	return nil
 }
 
-func (s *Redis) ItemExists(i index.Item) (bool, error) {
+func (s *Redis) ItemExists(i item.Item) (bool, error) {
 	size, _ := s.store.SetCard(cache.Key(keyBuffer, i.ID))
 	return size > 0, nil
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/go-gorp/gorp"
 	"github.com/lib/pq"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/gorpmapper"
 	"github.com/ovh/cds/sdk"
 	"github.com/ovh/cds/sdk/log"
@@ -28,7 +28,7 @@ func getUnit(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor, q g
 		return nil, err
 	}
 	if !isValid {
-		log.Error(ctx, "index.get> storage_unit %s data corrupted", u.ID)
+		log.Error(ctx, "storage.getUnit> storage_unit %s data corrupted", u.ID)
 		return nil, sdk.WithStack(sdk.ErrNotFound)
 	}
 
@@ -127,7 +127,7 @@ func DeleteItemUnit(m *gorpmapper.Mapper, db gorpmapper.SqlExecutorWithTx, u *It
 
 func DeleteItemsUnit(db gorp.SqlExecutor, unitID string, itemIDs []string) error {
 	query := `
-		DELETE FROM storage_unit_index
+		DELETE FROM storage_unit_item
 		WHERE unit_id = $1 AND item_id = ANY($2)
 	`
 	_, err := db.Exec(query, unitID, pq.StringArray(itemIDs))
@@ -141,7 +141,7 @@ func LoadAllItemsIDInBufferAndAllUnitsExceptCDS(db gorp.SqlExecutor, cdsBackendI
 		SELECT item_id 
 		FROM (
 			SELECT COUNT(*) as nb, item_id 
-			FROM storage_unit_index
+			FROM storage_unit_item
 			WHERE unit_id != $1
 			GROUP BY item_id
 		) as cc
@@ -155,29 +155,29 @@ func LoadAllItemsIDInBufferAndAllUnitsExceptCDS(db gorp.SqlExecutor, cdsBackendI
 
 func LoadOldItemUnitByItemStatusAndDuration(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor, status string, duration int, opts ...gorpmapper.GetOptionFunc) ([]ItemUnit, error) {
 	query := gorpmapper.NewQuery(`
-		SELECT storage_unit_index.*
-		FROM storage_unit_index
-		LEFT JOIN index ON index.id = storage_unit_index.item_id
+		SELECT storage_unit_item.*
+		FROM storage_unit_item
+		LEFT JOIN item ON item.id = storage_unit_item.item_id
 		WHERE
-			index.status = $1 AND
-            index.last_modified < NOW() - $2 * INTERVAL '1 second'
-		ORDER BY index.last_modified ASC
+			item.status = $1 AND
+            item.last_modified < NOW() - $2 * INTERVAL '1 second'
+		ORDER BY item.last_modified ASC
 	`).Args(status, duration)
 	return getAllItemUnits(ctx, m, db, query, opts...)
 }
 
 func LoadItemUnitByUnit(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor, unitID string, itemID string, opts ...gorpmapper.GetOptionFunc) (*ItemUnit, error) {
-	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_index WHERE unit_id = $1 and item_id = $2 LIMIT 1").Args(unitID, itemID)
+	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_item WHERE unit_id = $1 and item_id = $2 LIMIT 1").Args(unitID, itemID)
 	return getItemUnit(ctx, m, db, query, opts...)
 }
 
 func LoadItemUnitsByUnit(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor, unitID string, size int, opts ...gorpmapper.GetOptionFunc) ([]ItemUnit, error) {
-	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_index WHERE unit_id = $1 ORDER BY last_modified ASC LIMIT $2").Args(unitID, size)
+	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_item WHERE unit_id = $1 ORDER BY last_modified ASC LIMIT $2").Args(unitID, size)
 	return getAllItemUnits(ctx, m, db, query, opts...)
 }
 
 func LoadItemUnitByID(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor, id string, opts ...gorpmapper.GetOptionFunc) (*ItemUnit, error) {
-	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_index WHERE id = $1").Args(id)
+	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_item WHERE id = $1").Args(id)
 	return getItemUnit(ctx, m, db, query, opts...)
 }
 
@@ -196,11 +196,11 @@ func getItemUnit(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor,
 		return nil, err
 	}
 	if !isValid {
-		log.Error(ctx, "index.get> storage_unit_index %s data corrupted", i.ID)
+		log.Error(ctx, "storage.getItemUnit> storage_unit_item %s data corrupted", i.ID)
 		return nil, sdk.WithStack(sdk.ErrNotFound)
 	}
 
-	i.Item, err = index.LoadItemByID(ctx, m, db, i.ItemID, opts...)
+	i.Item, err = item.LoadByID(ctx, m, db, i.ItemID, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +209,7 @@ func getItemUnit(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor,
 }
 
 func LoadAllItemUnitsByItemID(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor, itemID string, opts ...gorpmapper.GetOptionFunc) ([]ItemUnit, error) {
-	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_index WHERE item_id = $1").Args(itemID)
+	query := gorpmapper.NewQuery("SELECT * FROM storage_unit_item WHERE item_id = $1").Args(itemID)
 	return getAllItemUnits(ctx, m, db, query, opts...)
 }
 
@@ -227,7 +227,7 @@ func getAllItemUnits(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecu
 			return nil, err
 		}
 		if !isValid {
-			log.Error(ctx, "storage.getAllItemUnits> storage_unit_index %s data corrupted", res[i].ID)
+			log.Error(ctx, "storage.getAllItemUnits> storage_unit_item %s data corrupted", res[i].ID)
 			continue
 		}
 		verifiedItems = append(verifiedItems, &res[i])
@@ -240,7 +240,7 @@ func getAllItemUnits(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecu
 		itemIDs = append(itemIDs, itemUnits[i].ItemID)
 	}
 
-	items, err := index.LoadItemByIDs(ctx, m, db, itemIDs, opts...)
+	items, err := item.LoadByIDs(ctx, m, db, itemIDs, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -258,35 +258,35 @@ func getAllItemUnits(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecu
 }
 
 func CountItemCompleted(db gorp.SqlExecutor) (int64, error) {
-	return db.SelectInt("SELECT COUNT(*) from index WHERE index.status = $1", index.StatusItemCompleted)
+	return db.SelectInt("SELECT COUNT(*) from item WHERE item.status = $1", item.StatusItemCompleted)
 }
 
 func CountItemIncoming(db gorp.SqlExecutor) (int64, error) {
-	return db.SelectInt("SELECT COUNT(*) from index WHERE index.status <> $1", index.StatusItemCompleted)
+	return db.SelectInt("SELECT COUNT(*) from item WHERE item.status <> $1", item.StatusItemCompleted)
 }
 
 func CountItemUnitByUnit(db gorp.SqlExecutor, unitID string) (int64, error) {
-	return db.SelectInt("SELECT COUNT(*) from storage_unit_index WHERE unit_id = $1", unitID)
+	return db.SelectInt("SELECT COUNT(*) from storage_unit_item WHERE unit_id = $1", unitID)
 }
 
 func LoadAllItemIDUnknownByUnit(db gorp.SqlExecutor, unitID string, limit int) ([]string, error) {
 	query := `
 		SELECT * 
 		FROM (
-			SELECT index.id 
-			FROM index
-			JOIN storage_unit_index ON index.id = storage_unit_index.item_id
-			WHERE index.status = $3
+			SELECT item.id 
+			FROM item
+			JOIN storage_unit_item ON item.id = storage_unit_item.item_id
+			WHERE item.status = $3
 			EXCEPT 
 			SELECT item_id
-			FROM storage_unit_index  
+			FROM storage_unit_item  
 			WHERE unit_id = $1
 		) IDS
 		LIMIT $2
 	`
 
 	var res []string
-	if _, err := db.Select(&res, query, unitID, limit, index.StatusItemCompleted); err != nil {
+	if _, err := db.Select(&res, query, unitID, limit, item.StatusItemCompleted); err != nil {
 		return nil, sdk.WithStack(err)
 	}
 

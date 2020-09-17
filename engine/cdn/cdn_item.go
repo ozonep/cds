@@ -12,7 +12,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/cdn/redis"
 	"github.com/ovh/cds/engine/cdn/storage"
 	"github.com/ovh/cds/engine/gorpmapper"
@@ -26,7 +26,7 @@ var (
 )
 
 func (s *Service) getItemLogValue(ctx context.Context, t sdk.CDNItemType, apiRefHash string, from uint, size int) (io.ReadCloser, error) {
-	item, err := index.LoadItemByAPIRefHashAndType(ctx, s.Mapper, s.mustDBWithCtx(ctx), apiRefHash, t)
+	item, err := item.LoadByAPIRefHashAndType(ctx, s.Mapper, s.mustDBWithCtx(ctx), apiRefHash, t)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (s *Service) getItemLogValue(ctx context.Context, t sdk.CDNItemType, apiRef
 	return s.LogCache.NewReader(item.ID, from, size), nil
 }
 
-func (s *Service) pushItemLogIntoCache(ctx context.Context, item index.Item) error {
+func (s *Service) pushItemLogIntoCache(ctx context.Context, item item.Item) error {
 	// Search item in a storage unit
 	itemUnits, err := storage.LoadAllItemUnitsByItemID(ctx, s.Mapper, s.mustDBWithCtx(ctx), item.ID)
 	if err != nil {
@@ -144,7 +144,7 @@ func (s *Service) pushItemLogIntoCache(ctx context.Context, item index.Item) err
 
 func (s *Service) completeItem(ctx context.Context, tx gorpmapper.SqlExecutorWithTx, itemUnit storage.ItemUnit) error {
 	// We need to lock the item and set its status to complete and also generate data hash
-	item, err := index.LoadAndLockItemByID(ctx, s.Mapper, tx, itemUnit.ItemID)
+	it, err := item.LoadAndLockByID(ctx, s.Mapper, tx, itemUnit.ItemID)
 	if err != nil {
 		if sdk.ErrorIs(err, sdk.ErrNotFound) {
 			return sdk.WrapError(sdk.ErrLocked, "item already locked")
@@ -152,8 +152,8 @@ func (s *Service) completeItem(ctx context.Context, tx gorpmapper.SqlExecutorWit
 		return err
 	}
 
-	// Update index with final data
-	item.Status = index.StatusItemCompleted
+	// Update item with final data
+	it.Status = item.StatusItemCompleted
 
 	var reader io.ReadCloser
 	switch itemUnit.UnitID {
@@ -195,11 +195,11 @@ func (s *Service) completeItem(ctx context.Context, tx gorpmapper.SqlExecutorWit
 	sha512S := hex.EncodeToString(sha512Hash.Sum(nil))
 	md5S := hex.EncodeToString(md5Hash.Sum(nil))
 
-	item.Hash = sha512S
-	item.MD5 = md5S
-	item.Size = size
+	it.Hash = sha512S
+	it.MD5 = md5S
+	it.Size = size
 
-	if err := index.UpdateItem(ctx, s.Mapper, tx, item); err != nil {
+	if err := item.Update(ctx, s.Mapper, tx, it); err != nil {
 		return err
 	}
 

@@ -3,14 +3,14 @@ package storage
 import (
 	"time"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/gorpmapper"
 	"github.com/ovh/cds/sdk"
 )
 
 func InitDBMapping(m *gorpmapper.Mapper) {
 	m.Register(m.NewTableMapping(Unit{}, "storage_unit", false, "id"))
-	m.Register(m.NewTableMapping(ItemUnit{}, "storage_unit_index", false, "id"))
+	m.Register(m.NewTableMapping(ItemUnit{}, "storage_unit_item", false, "id"))
 }
 
 type Unit struct {
@@ -30,12 +30,12 @@ func (i Unit) Canonical() gorpmapper.CanonicalForms {
 
 type ItemUnit struct {
 	gorpmapper.SignedEntity
-	ID           string      `json:"id" db:"id"`
-	ItemID       string      `json:"item_id" db:"item_id"`
-	UnitID       string      `json:"unit_id" db:"unit_id"`
-	LastModified time.Time   `json:"last_modified" db:"last_modified"`
-	Locator      string      `json:"-" db:"cipher_locator" gorpmapping:"encrypted,UnitID,ItemID"`
-	Item         *index.Item `json:"-" db:"-"`
+	ID           string     `json:"id" db:"id"`
+	ItemID       string     `json:"item_id" db:"item_id"`
+	UnitID       string     `json:"unit_id" db:"unit_id"`
+	LastModified time.Time  `json:"last_modified" db:"last_modified"`
+	Locator      string     `json:"-" db:"cipher_locator" gorpmapping:"encrypted,UnitID,ItemID"`
+	Item         *item.Item `json:"-" db:"-"`
 }
 
 func (i ItemUnit) Canonical() gorpmapper.CanonicalForms {

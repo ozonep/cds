@@ -9,7 +9,7 @@ import (
 
 	"go.opencensus.io/stats"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/cdn/storage"
 	"github.com/ovh/cds/engine/cdn/storage/encryption"
 	"github.com/ovh/cds/sdk"
@@ -61,7 +61,7 @@ func (c *CDS) Init(ctx context.Context, cfg interface{}) error {
 	return nil
 }
 
-func (c *CDS) ItemExists(i index.Item) (bool, error) {
+func (c *CDS) ItemExists(i item.Item) (bool, error) {
 	return true, nil
 }
 

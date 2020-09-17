@@ -16,7 +16,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/gorpmapper"
 	"github.com/ovh/cds/sdk"
 	"github.com/ovh/cds/sdk/log"
@@ -50,7 +50,7 @@ type Interface interface {
 	GorpMapper() *gorpmapper.Mapper
 	DB() *gorp.DbMap
 	Init(ctx context.Context, cfg interface{}) error
-	ItemExists(i index.Item) (bool, error)
+	ItemExists(i item.Item) (bool, error)
 	Lock()
 	Unlock()
 	Status(ctx context.Context) []sdk.MonitoringStatusLine
@@ -394,7 +394,7 @@ func (s *iuSource) Name() string {
 	return s.source.Name()
 }
 
-func (r RunningStorageUnits) GetSource(ctx context.Context, i *index.Item) (Source, error) {
+func (r RunningStorageUnits) GetSource(ctx context.Context, i *item.Item) (Source, error) {
 	ok, err := r.Buffer.ItemExists(*i)
 	if err != nil {
 		return nil, err

@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/cdn/storage"
 	"github.com/ovh/cds/engine/cdn/storage/encryption"
 	"github.com/ovh/cds/sdk"
@@ -61,7 +61,7 @@ func (s *Webdav) filename(i storage.ItemUnit) (string, error) {
 	return filepath.Join(s.config.Path, loc[:3], loc), nil
 }
 
-func (s *Webdav) ItemExists(i index.Item) (bool, error) {
+func (s *Webdav) ItemExists(i item.Item) (bool, error) {
 	iu, err := s.ExistsInDatabase(i.ID)
 	if err != nil {
 		if sdk.ErrorIs(err, sdk.ErrNotFound) {

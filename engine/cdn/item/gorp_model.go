@@ -1,11 +1,11 @@
-package index
+package item
 
 import (
 	"github.com/ovh/cds/engine/gorpmapper"
 )
 
 func InitDBMapping(m *gorpmapper.Mapper) {
-	m.Register(m.NewTableMapping(Item{}, "index", false, "id"))
+	m.Register(m.NewTableMapping(Item{}, "item", false, "id"))
 }
 
 func (i Item) Canonical() gorpmapper.CanonicalForms {

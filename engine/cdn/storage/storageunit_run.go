@@ -8,7 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/gorpmapper"
 	"github.com/ovh/cds/sdk"
 	"github.com/ovh/cds/sdk/log"
@@ -38,7 +38,7 @@ func (x *RunningStorageUnits) Run(ctx context.Context, s StorageUnit) error {
 			return err
 		}
 
-		item, err := index.LoadAndLockItemByID(ctx, s.GorpMapper(), tx, id, gorpmapper.GetOptions.WithDecryption)
+		item, err := item.LoadAndLockByID(ctx, s.GorpMapper(), tx, id, gorpmapper.GetOptions.WithDecryption)
 		if err != nil {
 			if !sdk.ErrorIs(err, sdk.ErrNotFound) {
 				log.ErrorWithFields(ctx, logrus.Fields{"stack_trace": fmt.Sprintf("%+v", err)}, "%s", err)
@@ -63,7 +63,7 @@ func (x *RunningStorageUnits) Run(ctx context.Context, s StorageUnit) error {
 	return nil
 }
 
-func (x *RunningStorageUnits) runItem(ctx context.Context, tx gorpmapper.SqlExecutorWithTx, dest StorageUnit, item *index.Item) error {
+func (x *RunningStorageUnits) runItem(ctx context.Context, tx gorpmapper.SqlExecutorWithTx, dest StorageUnit, item *item.Item) error {
 	t0 := time.Now()
 	log.Debug("storage.runItem(%s, %s)", dest.Name(), item.ID)
 	defer func() {
@@ -140,7 +140,7 @@ func (x *RunningStorageUnits) runItem(ctx context.Context, tx gorpmapper.SqlExec
 	return nil
 }
 
-func (x *RunningStorageUnits) NewItemUnit(ctx context.Context, su Interface, i *index.Item) (*ItemUnit, error) {
+func (x *RunningStorageUnits) NewItemUnit(ctx context.Context, su Interface, i *item.Item) (*ItemUnit, error) {
 	suloc, is := su.(StorageUnitWithLocator)
 	var loc string
 	if is {

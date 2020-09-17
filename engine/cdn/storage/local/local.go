@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ovh/cds/engine/cdn/index"
+	"github.com/ovh/cds/engine/cdn/item"
 	"github.com/ovh/cds/engine/cdn/storage"
 	"github.com/ovh/cds/engine/cdn/storage/encryption"
 	"github.com/ovh/cds/sdk"
@@ -67,7 +67,7 @@ func (s *Local) filename(i storage.ItemUnit) (string, error) {
 	return filepath.Join(s.config.Path, loc[:3], loc), nil
 }
 
-func (s *Local) ItemExists(i index.Item) (bool, error) {
+func (s *Local) ItemExists(i item.Item) (bool, error) {
 	iu, err := s.ExistsInDatabase(i.ID)
 	if err != nil {
 		if sdk.ErrorIs(err, sdk.ErrNotFound) {
