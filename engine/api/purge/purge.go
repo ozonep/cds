@@ -271,7 +271,7 @@ func deleteRunHistory(ctx context.Context, db *gorp.DbMap, workflowRunID int64, 
 	defer tx.Rollback() // nolint
 
 	log.Info(ctx, "purge> locking run %d", workflowRunID)
-	if _, err := workflow.LoadAndLockRunByID(tx, workflowRunID, workflow.LoadRunOptions{DisableDetailledNodeRun: true}); err != nil {
+	if _, err := workflow.LoadAndLockRunByID(tx, workflowRunID, workflow.LoadRunOptions{DisableDetailledNodeRun: true, WithDeleted: true}); err != nil {
 		if sdk.ErrorIs(err, sdk.ErrNotFound) {
 			log.Info(ctx, "purge> already locked %d, %v", workflowRunID, err)
 			return nil
