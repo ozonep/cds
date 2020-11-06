@@ -229,15 +229,18 @@ func workflows(ctx context.Context, db *gorp.DbMap, store cache.Store, workflowR
 // deleteWorkflowRunsHistory is useful to delete all the workflow run marked with to delete flag in db
 func deleteWorkflowRunsHistory(ctx context.Context, db *gorp.DbMap, sharedStorage objectstore.Driver, workflowRunsDeleted *stats.Int64Measure) error {
 	//Load service "CDN"
+	log.Info(ctx, "Loading CDN service")
 	srvs, err := services.LoadAllByType(ctx, db, sdk.TypeCDN)
 	if err != nil {
 		return err
 	}
+	log.Info(ctx, "Create CDN client")
 	cdnClient := services.NewClient(db, srvs)
 
 	limit := int64(2000)
 	offset := int64(0)
 	for {
+		log.Info(ctx, "Loading run to delete %d %d", offset, limit)
 		workflowRunIDs, _, _, count, err := workflow.LoadRunsIDsToDelete(db, offset, limit)
 		if err != nil {
 			return err
