@@ -67,7 +67,7 @@ func WorkflowRuns(ctx context.Context, DBFunc func() *gorp.DbMap, sharedStorage 
 				log.Warning(ctx, "purge> Error: %v", err)
 			}
 
-			log.Debug("purge> Deleting all workflow run marked to delete...")
+			log.Info(ctx, "purge> Deleting all workflow run marked to delete...")
 			if err := deleteWorkflowRunsHistory(ctx, DBFunc(), sharedStorage, workflowRunsDeleted); err != nil {
 				log.Warning(ctx, "purge> Error on deleteWorkflowRunsHistory : %v", err)
 			}
@@ -243,6 +243,7 @@ func deleteWorkflowRunsHistory(ctx context.Context, db *gorp.DbMap, sharedStorag
 			return err
 		}
 
+		log.Info(ctx, "Deleting %d workflow runs", len(workflowRunIDs))
 		for _, workflowRunID := range workflowRunIDs {
 			if err := deleteRunHistory(ctx, db, workflowRunID, cdnClient, sharedStorage, workflowRunsDeleted); err != nil {
 				log.Error(ctx, "unable to delete run history: %v", err)
