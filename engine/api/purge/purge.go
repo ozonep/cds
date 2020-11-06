@@ -51,7 +51,7 @@ func MarkRunsAsDelete(ctx context.Context, store cache.Store, DBFunc func() *gor
 
 // PurgeWorkflow deletes workflow runs marked as to delete
 func WorkflowRuns(ctx context.Context, DBFunc func() *gorp.DbMap, sharedStorage objectstore.Driver, workflowRunsMarkToDelete, workflowRunsDeleted *stats.Int64Measure) {
-	tickPurge := time.NewTicker(15 * time.Minute)
+	tickPurge := time.NewTicker(1 * time.Minute)
 	defer tickPurge.Stop()
 
 	for {
