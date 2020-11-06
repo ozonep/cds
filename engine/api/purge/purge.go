@@ -229,24 +229,24 @@ func workflows(ctx context.Context, db *gorp.DbMap, store cache.Store, workflowR
 // deleteWorkflowRunsHistory is useful to delete all the workflow run marked with to delete flag in db
 func deleteWorkflowRunsHistory(ctx context.Context, db *gorp.DbMap, sharedStorage objectstore.Driver, workflowRunsDeleted *stats.Int64Measure) error {
 	//Load service "CDN"
-	log.Info(ctx, "Loading CDN service")
+	log.Info(ctx, "purge> Loading CDN service")
 	srvs, err := services.LoadAllByType(ctx, db, sdk.TypeCDN)
 	if err != nil {
 		return err
 	}
-	log.Info(ctx, "Create CDN client")
+	log.Info(ctx, "purge> Create CDN client")
 	cdnClient := services.NewClient(db, srvs)
 
 	limit := int64(2000)
 	offset := int64(0)
 	for {
-		log.Info(ctx, "Loading run to delete %d %d", offset, limit)
+		log.Info(ctx, "purge> Loading run to delete %d %d", offset, limit)
 		workflowRunIDs, _, _, count, err := workflow.LoadRunsIDsToDelete(db, offset, limit)
 		if err != nil {
 			return err
 		}
 
-		log.Info(ctx, "Deleting %d workflow runs", len(workflowRunIDs))
+		log.Info(ctx, "purge> Deleting %d workflow runs", len(workflowRunIDs))
 		for _, workflowRunID := range workflowRunIDs {
 			if err := deleteRunHistory(ctx, db, workflowRunID, cdnClient, sharedStorage, workflowRunsDeleted); err != nil {
 				log.Error(ctx, "unable to delete run history: %v", err)
@@ -270,22 +270,27 @@ func deleteRunHistory(ctx context.Context, db *gorp.DbMap, workflowRunID int64, 
 	}
 	defer tx.Rollback() // nolint
 
+	log.Info(ctx, "purge> locking run %d", workflowRunID)
 	if _, err := workflow.LoadAndLockRunByID(tx, workflowRunID, workflow.LoadRunOptions{DisableDetailledNodeRun: true}); err != nil {
 		if sdk.ErrorIs(err, sdk.ErrNotFound) {
+			log.Info(ctx, "purge> already locked %d, %v", workflowRunID, err)
 			return nil
 		}
 		return err
 	}
 
+	log.Info(ctx, "purge> deleting artifact %d", workflowRunID)
 	if err := DeleteArtifacts(ctx, tx, sharedStorage, workflowRunID); err != nil {
 		return sdk.WithStack(err)
 	}
 
+	log.Info(ctx, "purge> deleting run %d", workflowRunID)
 	res, err := tx.Exec("DELETE FROM workflow_run WHERE workflow_run.id = $1", workflowRunID)
 	if err != nil {
 		return sdk.WithStack(err)
 	}
 
+	log.Info(ctx, "purge> deleting logs %d", workflowRunID)
 	_, code, err := cdnClient.DoJSONRequest(ctx, http.MethodPost, "/bulk/item/delete", sdk.CDNMarkDelete{RunID: workflowRunID}, nil)
 	if err != nil || code >= 400 {
 		return sdk.WithStack(err)
