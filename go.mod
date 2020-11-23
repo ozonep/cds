@@ -83,7 +83,7 @@ require (
 	github.com/mndrix/tap-go v0.0.0-20170113192335-56cca451570b // indirect
 	github.com/mum4k/termdash v0.10.0
 	github.com/nbutton23/zxcvbn-go v0.0.0-20180912185939-ae427f1e4c1d
-	github.com/ncw/swift v0.0.0-20171019114456-c95c6e5c2d1a
+	github.com/ncw/swift v1.0.52
 	github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20160621093029-daf2955e742c

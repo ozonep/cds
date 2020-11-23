@@ -14,7 +14,6 @@ import (
 	"github.com/ovh/cds/engine/cdn/storage/encryption"
 	"github.com/ovh/cds/engine/gorpmapper"
 	"github.com/ovh/cds/sdk"
-	"github.com/ovh/cds/sdk/log"
 )
 
 type Swift struct {
@@ -32,7 +31,7 @@ func init() {
 	storage.RegisterDriver("swift", new(Swift))
 }
 
-func (s *Swift) Init(ctx context.Context, cfg interface{}) error {
+func (s *Swift) Init(_ context.Context, cfg interface{}) error {
 	config, is := cfg.(*storage.SwiftStorageConfiguration)
 	if !is {
 		return sdk.WithStack(fmt.Errorf("invalid configuration: %T", cfg))
@@ -92,26 +91,17 @@ func (s *Swift) NewWriter(ctx context.Context, i sdk.CDNItemUnit) (io.WriteClose
 	return file, nil
 }
 
-func (s *Swift) NewReader(ctx context.Context, i sdk.CDNItemUnit) (io.ReadCloser, error) {
+func (s *Swift) NewReader(_ context.Context, i sdk.CDNItemUnit) (io.ReadCloser, error) {
 	container, object, err := s.getItemPath(i)
 	if err != nil {
 		return nil, err
 	}
 
-	pr, pw := io.Pipe()
-	gr := sdk.NewGoRoutines()
-	gr.Exec(ctx, "swift.newReader", func(ctx context.Context) {
-		if _, err = s.client.ObjectGet(container, object, pw, true, nil); err != nil {
-			log.Error(context.Background(), "unable to get object %s/%s: %v", container, object, err)
-			return
-		}
-		if err := pw.Close(); err != nil {
-			log.Error(context.Background(), "unable to close pipewriter %s/%s: %v", container, object, err)
-			return
-		}
-	})
-
-	return pr, nil
+	file, _, err := s.client.ObjectOpen(container, object, true, nil)
+	if err != nil {
+		return nil, sdk.WithStack(err)
+	}
+	return file, nil
 }
 
 func (s *Swift) getItemPath(i sdk.CDNItemUnit) (container string, object string, err error) {
