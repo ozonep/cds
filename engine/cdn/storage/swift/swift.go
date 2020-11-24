@@ -46,8 +46,7 @@ func (s *Swift) Init(_ context.Context, cfg interface{}) error {
 		UserName: config.Username,
 		ApiKey:   config.Password,
 	}
-
-	return nil
+	return sdk.WithStack(s.client.Authenticate())
 }
 
 func (s *Swift) ItemExists(ctx context.Context, m *gorpmapper.Mapper, db gorp.SqlExecutor, i sdk.CDNItem) (bool, error) {
