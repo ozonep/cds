@@ -2,6 +2,7 @@ package cdn
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"crypto/md5"
 	"crypto/sha512"
@@ -192,12 +193,17 @@ func (s *Service) pushItemLogIntoCache(ctx context.Context, it sdk.CDNItem) erro
 	}
 	defer storageReader.Close() // nolint
 
+	bts := &bytes.Buffer{}
+	if _, err := io.Copy(bts, storageReader); err != nil {
+		return sdk.WithStack(err)
+	}
+
 	// Create a writer for the cache
 	cacheWriter := s.LogCache.NewWriter(it.ID)
 	defer cacheWriter.Close() //nolint
 
 	// Write data in cache
-	if err := unitStorage.Read(*refItemUnit, storageReader, cacheWriter); err != nil {
+	if err := unitStorage.Read(*refItemUnit, bts, cacheWriter); err != nil {
 		return err
 	}
 
