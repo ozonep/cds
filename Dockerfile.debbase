@@ -1,0 +1,6 @@
+FROM golang:1.15-buster
+
+RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+RUN echo "deb https://deb.nodesource.com/node_12.x buster main" |  tee /etc/apt/sources.list.d/nodesource.list
+RUN echo "deb-src https://deb.nodesource.com/node_12.x buster main" | tee -a /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update && apt-get install -y libuv1 curl git perl bash nodejs build-essential

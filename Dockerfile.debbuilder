@@ -1,0 +1,9 @@
+FROM cds:base as sourcer
+
+COPY . ${GOPATH}/src/github.com/ovh/cds
+WORKDIR ${GOPATH}/src/github.com/ovh/cds
+
+RUN make clean && make build OS="linux" ARCH="amd64"
+
+FROM debian:buster
+COPY --from=sourcer /go/src/github.com/ovh/cds/. /app
