@@ -7,6 +7,9 @@
     "node": ">= 12.0.0",
     "npm": ">= 6.0.0"
   },
+  "browserslist": [
+    "last 1 Chrome version"
+  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve -c development",
