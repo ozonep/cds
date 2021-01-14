@@ -1,0 +1,7 @@
+FROM mhart/alpine-node:slim-12 as node-src
+
+FROM golang:1.15-alpine
+
+RUN apk upgrade -U -a && apk add --no-cache nodejs make git bash npm perl
+
+COPY --from=node-src /usr/bin/node /usr/bin/node

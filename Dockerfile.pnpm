@@ -1,0 +1,5 @@
+FROM mhart/alpine-node:slim-15
+
+RUN apk add --no-cache curl ca-certificates git
+
+RUN curl -L https://raw.githubusercontent.com/pnpm/self-installer/master/install.js | node

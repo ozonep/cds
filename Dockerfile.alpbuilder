@@ -1,0 +1,9 @@
+FROM newcds:base2 as sourcer
+
+COPY . /go/src/github.com/ovh/cds
+WORKDIR /go/src/github.com/ovh/cds
+
+RUN make clean && make build OS="linux" ARCH="amd64"
+
+FROM alpine:3.12
+COPY --from=sourcer /go/src/github.com/ovh/cds/. /app
