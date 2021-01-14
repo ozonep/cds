@@ -83,7 +83,7 @@ $(ALL_TARGETS):
 dist: $(ALL_TARGETS)
 	$(info sha512 = ${SHA512})
 	rm -f $(FILES)
-	cd dist/ && for i in `ls -p | grep -v /|grep -v FILES`; do echo "$$i;`${SHA512} $$i|cut -d ' ' -f1`" >> FILES; done;
+	cd dist/ && for i in `ls -p | grep -v /|grep -v FILES`; do echo "$$i;`sha512sum ./$$i | cut -d ' ' -f 1`" >> FILES; done;
 
 clean:
 	@rm -rf target

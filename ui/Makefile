@@ -28,7 +28,7 @@ FILES_UI = dist/FILES_UI
 $(FILES_UI): $(INDEX)
 	$(info sha512 = ${SHA512})
 	touch $(FILES_UI)
-	cd dist/ && for i in `ls -p | grep -v /|grep -v FILES_UI`; do echo "$$i;`${SHA512} $$i|cut -d ' ' -f1`" >> FILES_UI; done;
+	cd dist/ && for i in `ls -p | grep -v /|grep -v FILES_UI`; do echo "$$i;`sha512sum ./$$i | cut -d ' ' -f 1`" >> FILES_UI; done;
 
 build: $(FILES_UI) $(INDEX) ui.tar.gz
 
