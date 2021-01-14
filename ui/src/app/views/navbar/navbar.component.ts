@@ -121,7 +121,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
         // Listen change on recent projects viewed
         this.projectsSubscription = this._projectStore.getRecentProjects().subscribe(projects => {
-            if (projects) {
+            if (List.isList(projects) && projects.first()) {
                 this.recentItems = projects.toArray().map((prj) => ({
                     type: 'project',
                     value: prj.project_key,
@@ -137,7 +137,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
         // Listen change on recent app viewed
         this.applicationsSubscription = this._appStore.getRecentApplications().subscribe(apps => {
-            if (apps) {
+            if (List.isList(apps) && apps.first()) {
                 this.navRecentApp = apps;
                 this.recentItems = this.recentItems
                     .filter((i) => i.type !== 'application')
@@ -157,7 +157,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
         // Listen change on recent workflows viewed
         this.workflowsSubscription = this._workflowStore.getRecentWorkflows().subscribe(workflows => {
-            if (workflows) {
+            if (List.isList(workflows) && workflows.first()) {
                 this.navRecentWorkflows = workflows;
                 this.listWorkflows = workflows;
                 this.recentItems = workflows.toArray().map((wf) => ({
