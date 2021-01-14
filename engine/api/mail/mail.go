@@ -3,14 +3,14 @@ package mail
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net/smtp"
+	"strconv"
 	"sync/atomic"
 	"text/template"
+	"time"
 
-	"github.com/jordan-wright/email"
 	"github.com/ovh/cds/sdk"
+	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 var smtpUser, smtpPassword, smtpFrom, smtpHost, smtpPort, smtpModeTLS string
@@ -26,33 +26,22 @@ const (
 )
 
 const templateSignedup = `Welcome to CDS,
-
 You recently signed up for CDS.
-
 To verify your email address, follow this link:
 {{.URL}}
-
 If you are using the command line, you can run:
-
 $ cdsctl signup verify --api-url {{.APIURL}} {{.Token}}
-
 Regards,
 --
 CDS Team
 `
 
 const templateAskReset = `Hi {{.Username}},
-
 You asked for a password reset.
-
 Follow this link to set a new password on your account:
 {{.URL}}
-
-
 If you are using the command line, you can run:
-
 $ cdsctl reset-password confirm --api-url {{.APIURL}} {{.Token}}
-
 Regards,
 --
 CDS Team
@@ -124,41 +113,49 @@ func createTemplate(templ, callbackURL, callbackAPIURL, username, token string) 
 
 //SendEmail is the core function to send an email
 func SendEmail(ctx context.Context, subject string, mailContent *bytes.Buffer, userMail string, isHTML bool) error {
-	e := email.NewEmail()
-	e.From = smtpFrom
-	e.To = []string{userMail}
-	e.Subject = subject
-	e.Text = mailContent.Bytes()
-	if isHTML {
-		e.HTML = mailContent.Bytes()
-	}
-
 	if !smtpEnable {
 		fmt.Println("##### NO SMTP DISPLAY MAIL IN CONSOLE ######")
 		fmt.Printf("Subject:%s\n", subject)
-		fmt.Printf("Text:%s\n", string(e.Text))
+		fmt.Printf("Text:%s\n", mailContent.String())
 		fmt.Println("##### END MAIL ######")
 		return nil
 	}
-	servername := fmt.Sprintf("%s:%s", smtpHost, smtpPort)
-	var auth smtp.Auth
-	if smtpUser != "" && smtpPassword != "" {
-		auth = smtp.PlainAuth("", smtpUser, smtpPassword, smtpHost)
+	client := mail.NewSMTPClient()
+
+	client.Host = smtpHost
+	client.Port, _ = strconv.Atoi(smtpPort)
+	client.Username = smtpUser
+	client.Password = smtpPassword
+	client.Encryption = mail.EncryptionSSL
+	client.ConnectTimeout = 15 * time.Second
+	client.SendTimeout = 15 * time.Second
+	client.KeepAlive = false
+	client.Authentication = mail.AuthLogin
+
+	//Connect to client
+	smtpClient, err := client.Connect()
+
+	if err != nil {
+		lastError = err
+		return sdk.WithStack(err)
 	}
 
-	tlsconfig := &tls.Config{
-		InsecureSkipVerify: smtpInsecureSkipVerify,
-		ServerName:         smtpHost,
-	}
+	//Create the email message
+	email := mail.NewMSG()
 
-	var err error
+	email.SetFrom(smtpFrom).AddTo(userMail).SetSubject(subject)
+
+	email.GetFrom()
+	email.SetBody(mail.TextPlain, mailContent.String())
+	email.SetPriority(mail.PriorityHigh)
+
 	switch smtpModeTLS {
 	case modeStartTLS:
-		err = e.SendWithStartTLS(servername, auth, tlsconfig)
+		err = email.Send(smtpClient)
 	case modeTLS:
-		err = e.SendWithTLS(servername, auth, tlsconfig)
+		err = email.Send(smtpClient)
 	default:
-		err = e.Send(servername, auth)
+		err = email.Send(smtpClient)
 	}
 	if err != nil {
 		lastError = err
