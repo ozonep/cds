@@ -44,7 +44,7 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.3.2
 	github.com/googleapis/gnostic v0.1.0 // indirect
-	github.com/gophercloud/gophercloud v0.0.0-20190504011306-6f9faf57fddc
+	github.com/gophercloud/gophercloud v0.1.0
 	github.com/gorhill/cronexpr v0.0.0-20161205141322-d520615e531a
 	github.com/gorilla/handlers v0.0.0-20160816184729-a5775781a543
 	github.com/gorilla/mux v1.6.2
@@ -55,10 +55,8 @@ require (
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hinshun/vt10x v0.0.0-20180809195222-d55458df857c // indirect
 	github.com/iancoleman/orderedmap v0.0.0-20190318233801-ac98e3ecb4b0
-	github.com/imdario/mergo v0.0.0-20180119215619-163f41321a19 // indirect
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/itsjamie/gin-cors v0.0.0-20160420130702-97b4a9da7933
-	github.com/jordan-wright/email v4.0.1-0.20200917010138-e1c00e156980+incompatible
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/keybase/go-crypto v0.0.0-20181127160227-255a5089e85a
@@ -66,7 +64,7 @@ require (
 	github.com/keybase/go.dbus v0.0.0-20190710215703-a33a09c8a604
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
-	github.com/lib/pq v1.0.0
+	github.com/lib/pq v1.9.0
 	github.com/mailru/easyjson v0.0.0-20171120080333-32fa128f234d // indirect
 	github.com/maruel/panicparse v1.3.0
 	github.com/mattn/go-runewidth v0.0.1 // indirect
@@ -121,6 +119,7 @@ require (
 	github.com/vmware/govmomi v0.23.0
 	github.com/whilp/git-urls v0.0.0-20160530060445-31bac0d230fa
 	github.com/xanzy/go-gitlab v0.15.0
+	github.com/xhit/go-simple-mail/v2 v2.5.1
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/yesnault/go-toml v0.0.0-20191205182532-f5ef6cee7945
 	github.com/yuin/gluare v0.0.0-20170607022532-d7c94f1a80ed
@@ -147,10 +146,9 @@ require (
 	gopkg.in/square/go-jose.v2 v2.3.1
 	gopkg.in/yaml.v2 v2.3.0
 	gotest.tools v2.1.0+incompatible // indirect
-	k8s.io/api v0.0.0-20181204000039-89a74a8d264d
-	k8s.io/apimachinery v0.0.0-20190223094358-dcb391cde5ca
-	k8s.io/client-go v10.0.0+incompatible
-	k8s.io/klog v0.2.0 // indirect
+	k8s.io/api v0.17.14
+	k8s.io/apimachinery v0.17.14
+	k8s.io/client-go v0.17.14
 	sigs.k8s.io/yaml v1.1.0 // indirect
 )
 
@@ -169,5 +167,3 @@ replace github.com/ovh/cds/tools/smtpmock => ./tools/smtpmock
 replace github.com/keybase/go-keychain => github.com/yesnault/go-keychain v0.0.0-20190829085436-f78f7ae28786
 
 replace github.com/coreos/etcd v3.3.10+incompatible => github.com/coreos/etcd v3.3.13+incompatible
-
-replace github.com/jordan-wright/email => github.com/yesnault/email v0.0.0-20201006155628-d88bfe11e7f1
