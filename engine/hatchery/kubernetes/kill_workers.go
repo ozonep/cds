@@ -97,7 +97,10 @@ func (h *HatcheryKubernetes) killAwolWorkers(ctx context.Context) error {
 				}
 
 			}
-			if err := h.k8sClient.CoreV1().Pods(pod.Namespace).Delete(pod.Name, nil); err != nil {
+			deletePolicy := metav1.DeletePropagationBackground
+			if err := h.k8sClient.CoreV1().Pods(pod.Namespace).Delete(pod.Name, &metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			}); err != nil {
 				globalErr = err
 				log.Error(ctx, "hatchery:kubernetes> killAwolWorkers> Cannot delete pod %s (%s)", pod.Name, err)
 			}
