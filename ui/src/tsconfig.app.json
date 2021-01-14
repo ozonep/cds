@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
-    "sourceMap": true,
+    "sourceMap": false,
     "declaration": false,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es5",
+    "target": "es2016",
+    "removeComments": true,
     "lib": [
       "es2016",
       "dom"
     ],
     "outDir": "../out-tsc/app",
-    "module": "esnext",
+    "module": "es2020",
     "baseUrl": "",
     "paths": {},
     "types": []
