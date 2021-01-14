@@ -6,7 +6,6 @@ require (
 	contrib.go.opencensus.io/exporter/jaeger v0.1.0
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/Azure/go-autorest v11.1.1+incompatible // indirect
 	github.com/Microsoft/go-winio v0.4.7 // indirect
 	github.com/Netflix/go-expect v0.0.0-20180928190340-9d1f4485533b // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
@@ -49,7 +48,6 @@ require (
 	github.com/gorilla/handlers v0.0.0-20160816184729-a5775781a543
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/websocket v1.4.2
-	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.9.6 // indirect
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/vault/api v1.0.4
@@ -92,7 +90,6 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pborman/uuid v0.0.0-20170612153648-e790cca94e6c
 	github.com/pelletier/go-toml v1.8.0
-	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
 	github.com/pkg/errors v0.8.1
 	github.com/poy/onpar v0.0.0-20190519213022-ee068f8ea4d1 // indirect
@@ -139,7 +136,6 @@ require (
 	gopkg.in/go-playground/validator.v8 v8.18.2 // indirect
 	gopkg.in/gorp.v1 v1.7.1 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.14
-	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ldap.v2 v2.5.1
 	gopkg.in/olivere/elastic.v6 v6.2.17
 	gopkg.in/spacemonkeygo/httpsig.v0 v0.0.0-20170228231032-6732593ec966
@@ -149,7 +145,6 @@ require (
 	k8s.io/api v0.17.14
 	k8s.io/apimachinery v0.17.14
 	k8s.io/client-go v0.17.14
-	sigs.k8s.io/yaml v1.1.0 // indirect
 )
 
 replace github.com/alecthomas/jsonschema => github.com/sguiheux/jsonschema v0.2.0
