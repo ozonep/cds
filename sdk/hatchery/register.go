@@ -99,6 +99,7 @@ func CheckWorkerModelRegister(h Interface, modelPath string) error {
 		}
 	}
 	if sendError {
+		log.Error(context.TODO(), "Shit that is error!")
 		return sdk.WithStack(sdk.ErrWorkerModelDeploymentFailed)
 	}
 	return nil
